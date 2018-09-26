@@ -3,8 +3,6 @@
 //
 //  Created by Nick Italiano on 10/22/16.
 //
-
-#ifdef HAVE_GOOGLE_MAPS
 #import <UIKit/UIKit.h>
 #import "AIRGoogleMapPolyline.h"
 #import "AIRGMSPolyline.h"
@@ -34,16 +32,13 @@
     [path addCoordinate:coordinates[i].coordinate];
   }
 
-  _polyline.path = path;
-
-  [self configureStyleSpansIfNeeded];
+   _polyline.path = path;
 }
 
 -(void)setStrokeColor:(UIColor *)strokeColor
 {
   _strokeColor = strokeColor;
   _polyline.strokeColor = strokeColor;
-  [self configureStyleSpansIfNeeded];
 }
 
 -(void)setStrokeWidth:(double)strokeWidth
@@ -56,11 +51,6 @@
 {
   _fillColor = fillColor;
   _polyline.spans = @[[GMSStyleSpan spanWithColor:fillColor]];
-}
-
-- (void)setLineDashPattern:(NSArray<NSNumber *> *)lineDashPattern {
-  _lineDashPattern = lineDashPattern;
-  [self configureStyleSpansIfNeeded];
 }
 
 -(void)setGeodesic:(BOOL)geodesic
@@ -91,25 +81,4 @@
   _polyline.onPress = onPress;
 }
 
-- (void)configureStyleSpansIfNeeded {
-  if (!_strokeColor || !_lineDashPattern || !_polyline.path) {
-      return;
-  }
-
-  BOOL isLine = YES;
-  NSMutableArray *styles = [[NSMutableArray alloc] init];
-  for (NSInteger i = 0; i < _lineDashPattern.count; i++) {
-    if (isLine) {
-      [styles addObject:[GMSStrokeStyle solidColor:_strokeColor]];
-    } else {
-      [styles addObject:[GMSStrokeStyle solidColor:[UIColor clearColor]]];
-    }
-    isLine = !isLine;
-  }
-
-  _polyline.spans = GMSStyleSpans(_polyline.path, styles, _lineDashPattern, kGMSLengthRhumb);
-}
-
 @end
-
-#endif

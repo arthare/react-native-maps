@@ -5,15 +5,13 @@
 //  Created by Gil Birman on 9/2/16.
 //
 
-#ifdef HAVE_GOOGLE_MAPS
-
 #import "AIRGoogleMapMarker.h"
 #import <GoogleMaps/GoogleMaps.h>
 #import <React/RCTImageLoader.h>
 #import <React/RCTUtils.h>
 #import "AIRGMSMarker.h"
 #import "AIRGoogleMapCallout.h"
-#import "AIRDummyView.h"
+#import "DummyView.h"
 
 CGRect unionRect(CGRect a, CGRect b) {
   return CGRectMake(
@@ -92,12 +90,12 @@ CGRect unionRect(CGRect a, CGRect b) {
   } else { // a child view of the marker
     [self iconViewInsertSubview:(UIView*)subview atIndex:atIndex+1];
   }
-  AIRDummyView *dummySubview = [[AIRDummyView alloc] initWithView:(UIView *)subview];
+  DummyView *dummySubview = [[DummyView alloc] initWithView:(UIView *)subview];
   [super insertReactSubview:(UIView*)dummySubview atIndex:atIndex];
 }
 
 - (void)removeReactSubview:(id<RCTComponent>)dummySubview {
-  UIView* subview = ((AIRDummyView*)dummySubview).view;
+  UIView* subview = ((DummyView*)dummySubview).view;
 
   if ([subview isKindOfClass:[AIRGoogleMapCallout class]]) {
     self.calloutView = nil;
@@ -113,26 +111,6 @@ CGRect unionRect(CGRect a, CGRect b) {
 
 - (void)hideCalloutView {
   [_realMarker.map setSelectedMarker:Nil];
-}
-
-- (void)redraw {
-  if (!_realMarker.iconView) return;
-  
-  BOOL oldValue = _realMarker.tracksViewChanges;
-  
-  if (oldValue == YES)
-  {
-    // Immediate refresh, like right now. Not waiting for next frame.
-    UIView *view = _realMarker.iconView;
-    _realMarker.iconView = nil;
-    _realMarker.iconView = view;
-  }
-  else
-  {
-    // Refresh according to docs
-    _realMarker.tracksViewChanges = YES;
-    _realMarker.tracksViewChanges = NO;
-  }
 }
 
 - (UIView *)markerInfoContents {
@@ -246,7 +224,7 @@ CGRect unionRect(CGRect a, CGRect b) {
                                                                  dispatch_async(dispatch_get_main_queue(), ^{
 
                                                                    // TODO(gil): This way allows different image sizes
-                                                                   if (self->_iconImageView) [self->_iconImageView removeFromSuperview];
+                                                                   if (_iconImageView) [_iconImageView removeFromSuperview];
 
                                                                    // ... but this way is more efficient?
 //                                                                   if (_iconImageView) {
@@ -272,7 +250,7 @@ CGRect unionRect(CGRect a, CGRect b) {
                                                                    CGRect selfBounds = unionRect(bounds, self.bounds);
                                                                    [self setFrame:selfBounds];
 
-                                                                   self->_iconImageView = imageView;
+                                                                   _iconImageView = imageView;
                                                                    [self iconViewInsertSubview:imageView atIndex:0];
                                                                  });
                                                                }];
@@ -302,11 +280,6 @@ CGRect unionRect(CGRect a, CGRect b) {
 - (void)setAnchor:(CGPoint)anchor {
   _anchor = anchor;
   _realMarker.groundAnchor = anchor;
-}
-
-- (void)setCalloutAnchor:(CGPoint)calloutAnchor {
-  _calloutAnchor = calloutAnchor;
-  _realMarker.infoWindowAnchor = calloutAnchor;
 }
 
 
@@ -341,5 +314,3 @@ CGRect unionRect(CGRect a, CGRect b) {
 }
 
 @end
-
-#endif
